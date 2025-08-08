@@ -554,8 +554,8 @@ export const Landing: React.FC = () => {
             toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our updates.`);
           } catch (emailError) {
             console.warn('Failed to store email for marketing:', emailError);
+            // Just show success without the warning - email storage is optional
             toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
-            toast.warning('⚠️ Scan started successfully, but we couldn\'t save your email for updates. Your scan will still complete normally.');
           }
         } else {
           toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
