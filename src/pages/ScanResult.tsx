@@ -24,7 +24,7 @@ import {
   colors 
 } from '../styles/components';
 import { ScanResult, ScanRequest } from '../types';
-import { scanService } from '../services/api';
+import { apiService } from '../services/api';
 import Loading from '../components/Loading';
 import { toast } from 'react-toastify';
 
@@ -267,8 +267,8 @@ const ScanResultPage: React.FC = () => {
       setLoading(true);
       
       const [requestResponse, resultResponse] = await Promise.all([
-        scanService.getScanRequest(id!),
-        scanService.getScanResult(id!)
+        apiService.getScanRequest(id!),
+        apiService.getScanResult(id!)
       ]);
 
       if (requestResponse.success && requestResponse.data) {

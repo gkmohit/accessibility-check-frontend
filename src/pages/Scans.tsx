@@ -20,7 +20,7 @@ import {
   colors 
 } from '../styles/components';
 import { ScanRequest } from '../types';
-import { scanService } from '../services/api';
+import { apiService } from '../services/api';
 import Loading from '../components/Loading';
 import { toast } from 'react-toastify';
 
@@ -236,7 +236,7 @@ const Scans: React.FC = () => {
   const fetchScans = async () => {
     try {
       setLoading(true);
-      const response = await scanService.getScanRequests();
+      const response = await apiService.getScanRequests();
       
       if (response.success && response.data) {
         const sortedScans = response.data.sort(
@@ -282,7 +282,7 @@ const Scans: React.FC = () => {
     }
 
     try {
-      const response = await scanService.deleteScanRequest(scanId);
+      const response = await apiService.deleteScanRequest(scanId);
       if (response.success) {
         setScans(scans.filter(scan => scan.id !== scanId));
         toast.success('Scan deleted successfully');
@@ -295,7 +295,7 @@ const Scans: React.FC = () => {
 
   const handleTriggerScan = async (scanId: string) => {
     try {
-      const response = await scanService.triggerImmediateScan(scanId);
+      const response = await apiService.triggerImmediateScan(scanId);
       if (response.success) {
         toast.success('Scan triggered successfully');
         await fetchScans(); // Refresh the list

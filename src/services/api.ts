@@ -240,22 +240,28 @@ export const apiService = {
 
   triggerImmediateScan: async (scanId: string): Promise<ApiResponse<void>> => {
     try {
-      // For the backend API, we need to get the job details first, then trigger immediate scan
-      const scanRequest = await scanService.getScanRequest(scanId);
-      if (!scanRequest.success || !scanRequest.data) {
-        throw new Error('Scan request not found');
+      // For the backend API, we need to get the job details first from the scheduled jobs list
+      const jobsList = await scanService.listScheduledJobs();
+      const job = jobsList.jobs.find(j => j.id === scanId);
+      
+      if (!job) {
+        return {
+          success: false,
+          message: 'Scan request not found',
+          errors: ['Job not found in scheduled jobs list']
+        };
       }
 
-      await scanService.runImmediateScan(scanRequest.data.email, scanRequest.data.websiteUrl);
+      await scanService.runImmediateScan(job.email, job.url);
       return {
         success: true,
-        message: 'Scan triggered successfully',
+        message: 'Immediate scan triggered successfully'
       };
     } catch (error: any) {
       return {
         success: false,
         message: error.message,
-        errors: [error.message],
+        errors: [error.message]
       };
     }
   },

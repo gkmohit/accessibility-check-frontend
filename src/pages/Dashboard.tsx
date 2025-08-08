@@ -19,7 +19,7 @@ import {
   colors 
 } from '../styles/components';
 import { DashboardStats, ScanRequest } from '../types';
-import { scanService } from '../services/api';
+import { scanService, apiService } from '../services/api';
 import Loading from '../components/Loading';
 import HealthCheck from '../components/HealthCheck';
 import Troubleshoot from '../components/Troubleshoot';
@@ -241,8 +241,8 @@ const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         const [statsResponse, scansResponse] = await Promise.all([
-          scanService.getDashboardStats(),
-          scanService.getScanRequests()
+          apiService.getDashboardStats(),
+          apiService.getScanRequests()
         ]);
 
         if (statsResponse.success && statsResponse.data) {
