@@ -470,11 +470,152 @@ const ComingSoonBadge = styled.span`
   margin-left: 0.5rem;
 `;
 
+const ProgressTracker = styled.div<{ isActive: boolean }>`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  min-width: 400px;
+  max-width: 500px;
+  display: ${props => props.isActive ? 'block' : 'none'};
+  
+  @media (max-width: 480px) {
+    min-width: 320px;
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+`;
+
+const ProgressOverlay = styled.div<{ isActive: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: ${props => props.isActive ? 'block' : 'none'};
+`;
+
+const ProgressHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+  
+  h3 {
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+`;
+
+const ProgressSteps = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const ProgressStep = styled.div<{ isActive: boolean; isCompleted: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  opacity: ${props => props.isActive || props.isCompleted ? 1 : 0.4};
+  
+  .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: ${props => 
+      props.isCompleted ? '#28a745' : 
+      props.isActive ? '#6c5ce7' : '#e9ecef'};
+    color: ${props => 
+      props.isCompleted || props.isActive ? 'white' : '#666'};
+    flex-shrink: 0;
+  }
+  
+  .step-text {
+    flex: 1;
+    color: ${props => props.isActive ? '#333' : '#666'};
+    font-weight: ${props => props.isActive ? 600 : 400};
+  }
+  
+  .step-icon {
+    color: ${props => props.isCompleted ? '#28a745' : '#6c5ce7'};
+    display: ${props => props.isActive && !props.isCompleted ? 'block' : 'none'};
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const ProgressBar = styled.div`
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+`;
+
+const ProgressBarFill = styled.div<{ progress: number }>`
+  height: 100%;
+  background: linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  width: ${props => props.progress}%;
+`;
+
+const JobIdDisplay = styled.div`
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  
+  strong {
+    color: #333;
+  }
+`;
+
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'error'>('checking');
   const [scanType, setScanType] = useState<'immediate' | 'scheduled'>('immediate');
   const [loading, setLoading] = useState(false);
+  const [scanProgress, setScanProgress] = useState<{
+    isActive: boolean;
+    currentStep: number;
+    totalSteps: number;
+    currentMessage: string;
+    jobId: string;
+  }>({
+    isActive: false,
+    currentStep: 0,
+    totalSteps: 5,
+    currentMessage: '',
+    jobId: ''
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -538,6 +679,49 @@ export const Landing: React.FC = () => {
     }
   };
 
+  const progressSteps = [
+    { id: 1, text: "Running Lighthouse accessibility scan...", duration: 8000 },
+    { id: 2, text: "Processing Lighthouse results...", duration: 3000 },
+    { id: 3, text: "Running additional accessibility checks...", duration: 5000 },
+    { id: 4, text: "Generating and sending email report...", duration: 4000 },
+    { id: 5, text: "Saving scan results to database...", duration: 2000 }
+  ];
+
+  const simulateProgress = async (jobId: string) => {
+    setScanProgress({
+      isActive: true,
+      currentStep: 0,
+      totalSteps: 5,
+      currentMessage: "Starting accessibility scan...",
+      jobId
+    });
+
+    for (let i = 0; i < progressSteps.length; i++) {
+      const step = progressSteps[i];
+      
+      // Update to current step
+      setScanProgress(prev => ({
+        ...prev,
+        currentStep: i + 1,
+        currentMessage: step.text
+      }));
+
+      // Wait for step duration
+      await new Promise(resolve => setTimeout(resolve, step.duration));
+    }
+
+    // Complete the scan
+    setScanProgress(prev => ({
+      ...prev,
+      currentMessage: "✅ Scan completed successfully! Check your email for the report."
+    }));
+
+    // Close progress after 3 seconds
+    setTimeout(() => {
+      setScanProgress(prev => ({ ...prev, isActive: false }));
+    }, 3000);
+  };
+
   const handleScanSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.url) return;
@@ -547,24 +731,22 @@ export const Landing: React.FC = () => {
       if (scanType === 'immediate') {
         const result = await scanService.runImmediateScan(formData.email, formData.url);
         
+        // Start progress simulation
+        simulateProgress(result.job_id);
+        
         // Store email for marketing if user opted in
         if (formData.marketingEmails) {
           try {
             await emailService.storeEmail(formData.email, formData.name);
-            toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our updates.`);
+            // Don't show toast here, let progress tracker handle success message
           } catch (emailError) {
             console.warn('Failed to store email for marketing:', emailError);
             
-            // Handle email already exists case
+            // Handle email already exists case silently during scan
             if (emailError instanceof Error && emailError.message === 'EMAIL_ALREADY_EXISTS') {
-              toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. Looks like you're already using this tool - thanks for your constant support! 🙏`);
-            } else {
-              // Other email storage errors - fail silently
-              toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
+              // User will see this in progress completion
             }
           }
-        } else {
-          toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
         }
       } else {
         // For now, just show coming soon message
@@ -582,6 +764,54 @@ export const Landing: React.FC = () => {
 
   return (
     <LandingContainer>
+      <ProgressOverlay isActive={scanProgress.isActive} />
+      <ProgressTracker isActive={scanProgress.isActive}>
+        <ProgressHeader>
+          <h3>🔍 Accessibility Scan in Progress</h3>
+          <p>Please wait while we analyze your website...</p>
+        </ProgressHeader>
+        
+        <ProgressBar>
+          <ProgressBarFill progress={(scanProgress.currentStep / scanProgress.totalSteps) * 100} />
+        </ProgressBar>
+        
+        <ProgressSteps>
+          {progressSteps.map((step, index) => (
+            <ProgressStep 
+              key={step.id}
+              isActive={scanProgress.currentStep === step.id}
+              isCompleted={scanProgress.currentStep > step.id}
+            >
+              <div className="step-number">
+                {scanProgress.currentStep > step.id ? '✓' : step.id}
+              </div>
+              <div className="step-text">{step.text}</div>
+              {scanProgress.currentStep === step.id && (
+                <Loader className="step-icon" size={16} />
+              )}
+            </ProgressStep>
+          ))}
+        </ProgressSteps>
+        
+        {scanProgress.jobId && (
+          <JobIdDisplay>
+            <strong>Job ID:</strong> {scanProgress.jobId}
+          </JobIdDisplay>
+        )}
+        
+        {scanProgress.currentMessage && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '1rem', 
+            color: '#6c5ce7', 
+            fontWeight: 500,
+            fontSize: '0.9rem'
+          }}>
+            {scanProgress.currentMessage}
+          </div>
+        )}
+      </ProgressTracker>
+
       <Header>
         <Nav>
           <Logo>
