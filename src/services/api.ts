@@ -92,9 +92,51 @@ export const scanService = {
   removeScheduledJob: async (jobId: string): Promise<{ message: string }> => {
     const response = await api.delete(`/jobs/${jobId}`);
     return response.data;
+  }
+};
+
+// Email management service
+export const emailService = {
+  // Store email address for marketing
+  storeEmail: async (email: string, name?: string): Promise<{ id: string; message: string }> => {
+    const response = await api.post('/emails', { 
+      email, 
+      name: name || '',
+      active: true 
+    });
+    return response.data;
   },
 
-  // Legacy methods for compatibility with existing components
+  // List all emails
+  listEmails: async (activeOnly: boolean = true): Promise<{ emails: Array<{
+    id: string;
+    email: string;
+    name: string;
+    active: boolean;
+    created_at: string;
+    updated_at: string;
+  }> }> => {
+    const response = await api.get('/emails', {
+      params: activeOnly ? { active: true } : {}
+    });
+    return response.data;
+  },
+
+  // Update email address or display name
+  updateEmail: async (id: string, data: { email?: string; name?: string }): Promise<{ message: string }> => {
+    const response = await api.put(`/emails/${id}`, data);
+    return response.data;
+  },
+
+  // Soft delete (deactivate) email
+  deleteEmail: async (id: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/emails/${id}`);
+    return response.data;
+  }
+};
+
+// Legacy API service for compatibility with existing components
+export const apiService = {
   createScanRequest: async (scanData: Omit<ScanRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<ScanRequest>> => {
     // Convert to immediate scan for now
     try {

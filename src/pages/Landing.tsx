@@ -12,7 +12,7 @@ import {
   Globe,
   Users
 } from 'lucide-react';
-import { scanService } from '../services/api';
+import { scanService, emailService } from '../services/api';
 
 // Styled components inspired by Monday.com design
 const LandingContainer = styled.div`
@@ -490,11 +490,19 @@ export const Landing: React.FC = () => {
     try {
       if (scanType === 'immediate') {
         const result = await scanService.runImmediateScan(formData.email, formData.url);
-        toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
         
-        // Log marketing preference (you can send this to your backend later)
+        // Store email for marketing if user opted in
         if (formData.marketingEmails) {
-          console.log('User opted in for marketing emails:', formData.email);
+          try {
+            await emailService.storeEmail(formData.email);
+            toast.success(`Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our marketing updates.`);
+          } catch (emailError) {
+            console.warn('Failed to store email for marketing:', emailError);
+            toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
+            toast.warning('We couldn\'t subscribe you to marketing emails at this time. Please try again later.');
+          }
+        } else {
+          toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
         }
       } else {
         // For now, just show coming soon message
