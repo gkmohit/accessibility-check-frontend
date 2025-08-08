@@ -19,7 +19,7 @@ import { scanService, emailService } from '../services/api';
 // Styled components inspired by Monday.com design
 const LandingContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%);
+  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
   color: white;
   overflow-x: hidden;
 `;
@@ -84,7 +84,7 @@ const NavLink = styled.a`
   cursor: pointer;
   
   &:hover {
-    color: #6c5ce7;
+    color: #0091ae;
   }
 `;
 
@@ -184,8 +184,8 @@ const Input = styled.input`
   
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    border-color: #0091ae;
+    box-shadow: 0 0 0 3px rgba(0, 145, 174, 0.1);
   }
 `;
 
@@ -198,8 +198,8 @@ const ScanTypeSelector = styled.div`
 const ScanTypeButton = styled.button<{ active: boolean }>`
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid ${props => props.active ? '#6c5ce7' : '#e0e0e0'};
-  background: ${props => props.active ? '#6c5ce7' : 'white'};
+  border: 2px solid ${props => props.active ? '#0091ae' : '#e0e0e0'};
+  background: ${props => props.active ? '#0091ae' : 'white'};
   color: ${props => props.active ? 'white' : '#666'};
   border-radius: 8px;
   font-weight: 500;
@@ -211,8 +211,8 @@ const ScanTypeButton = styled.button<{ active: boolean }>`
   gap: 0.5rem;
   
   &:hover {
-    border-color: #6c5ce7;
-    background: ${props => props.active ? '#5a4fcf' : '#f8f7ff'};
+    border-color: #0091ae;
+    background: ${props => props.active ? '#007a94' : '#f0f9fb'};
   }
 `;
 
@@ -226,8 +226,8 @@ const DateTimeInput = styled.input`
   
   &:focus {
     outline: none;
-    border-color: #6c5ce7;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    border-color: #0091ae;
+    box-shadow: 0 0 0 3px rgba(0, 145, 174, 0.1);
   }
 `;
 
@@ -247,13 +247,13 @@ const Checkbox = styled.input`
   margin-top: 0.1rem;
   
   &:checked {
-    background-color: #6c5ce7;
-    border-color: #6c5ce7;
+    background-color: #0091ae;
+    border-color: #0091ae;
   }
   
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 145, 174, 0.1);
   }
 `;
 
@@ -268,7 +268,7 @@ const CheckboxLabel = styled.label`
 const StartScanButton = styled.button`
   width: 100%;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%);
+  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -283,7 +283,7 @@ const StartScanButton = styled.button`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 145, 174, 0.3);
   }
   
   &:disabled {
@@ -397,7 +397,7 @@ const ToolLogo = styled.div`
   width: 80px;
   height: 80px;
   margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%);
+  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -430,7 +430,7 @@ const FooterSection = styled.div`
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: #fd79a8;
+    color: #ff7a59;
   }
   
   ul {
@@ -542,7 +542,7 @@ const ProgressStep = styled.div<{ isActive: boolean; isCompleted: boolean }>`
     font-size: 0.9rem;
     background: ${props => 
       props.isCompleted ? '#28a745' : 
-      props.isActive ? '#6c5ce7' : '#e9ecef'};
+      props.isActive ? '#0091ae' : '#e9ecef'};
     color: ${props => 
       props.isCompleted || props.isActive ? 'white' : '#666'};
     flex-shrink: 0;
@@ -555,7 +555,7 @@ const ProgressStep = styled.div<{ isActive: boolean; isCompleted: boolean }>`
   }
   
   .step-icon {
-    color: ${props => props.isCompleted ? '#28a745' : '#6c5ce7'};
+    color: ${props => props.isCompleted ? '#28a745' : '#0091ae'};
     display: ${props => props.isActive && !props.isCompleted ? 'block' : 'none'};
     animation: spin 1s linear infinite;
   }
@@ -577,7 +577,7 @@ const ProgressBar = styled.div`
 
 const ProgressBarFill = styled.div<{ progress: number }>`
   height: 100%;
-  background: linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%);
+  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
   border-radius: 4px;
   transition: width 0.5s ease;
   width: ${props => props.progress}%;
@@ -612,7 +612,7 @@ export const Landing: React.FC = () => {
   }>({
     isActive: false,
     currentStep: 0,
-    totalSteps: 5,
+    totalSteps: 4,
     currentMessage: '',
     jobId: ''
   });
@@ -683,15 +683,14 @@ export const Landing: React.FC = () => {
     { id: 1, text: "Running Lighthouse accessibility scan...", duration: 8000 },
     { id: 2, text: "Processing Lighthouse results...", duration: 3000 },
     { id: 3, text: "Running additional accessibility checks...", duration: 5000 },
-    { id: 4, text: "Generating and sending email report...", duration: 4000 },
-    { id: 5, text: "Saving scan results to database...", duration: 2000 }
+    { id: 4, text: "Generating and sending email report...", duration: 6000 }
   ];
 
   const simulateProgress = async (jobId: string) => {
     setScanProgress({
       isActive: true,
       currentStep: 0,
-      totalSteps: 5,
+      totalSteps: 4,
       currentMessage: "Starting accessibility scan...",
       jobId
     });
@@ -803,7 +802,7 @@ export const Landing: React.FC = () => {
           <div style={{ 
             textAlign: 'center', 
             marginTop: '1rem', 
-            color: '#6c5ce7', 
+            color: '#0091ae', 
             fontWeight: 500,
             fontSize: '0.9rem'
           }}>
@@ -953,7 +952,7 @@ export const Landing: React.FC = () => {
           
           <FeaturesGrid>
             <FeatureCard>
-              <FeatureIcon color="linear-gradient(135deg, #6c5ce7 0%, #fd79a8 100%)">
+              <FeatureIcon color="linear-gradient(135deg, #0091ae 0%, #ff7a59 100%)">
                 <Globe size={24} />
               </FeatureIcon>
               <FeatureTitle>Submit Your URL</FeatureTitle>
@@ -964,7 +963,7 @@ export const Landing: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard>
-              <FeatureIcon color="linear-gradient(135deg, #20c997 0%, #6c5ce7 100%)">
+              <FeatureIcon color="linear-gradient(135deg, #ff7a59 0%, #0091ae 100%)">
                 <BarChart3 size={24} />
               </FeatureIcon>
               <FeatureTitle>Automated Analysis</FeatureTitle>
@@ -975,7 +974,7 @@ export const Landing: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard>
-              <FeatureIcon color="linear-gradient(135deg, #fd79a8 0%, #20c997 100%)">
+              <FeatureIcon color="linear-gradient(135deg, #0091ae 0%, #ff7a59 100%)">
                 <Users size={24} />
               </FeatureIcon>
               <FeatureTitle>Detailed Reports</FeatureTitle>
