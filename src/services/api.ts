@@ -22,6 +22,12 @@ api.interceptors.response.use(
       return Promise.reject(networkError);
     }
     
+    // Handle specific HTTP status codes
+    if (error.response?.status === 409) {
+      const conflictError = new Error('EMAIL_ALREADY_EXISTS');
+      return Promise.reject(conflictError);
+    }
+    
     // Check for API error responses
     if (error.response?.data?.error) {
       const apiError = new Error(error.response.data.error);

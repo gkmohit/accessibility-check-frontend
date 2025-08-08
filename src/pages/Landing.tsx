@@ -554,8 +554,14 @@ export const Landing: React.FC = () => {
             toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our updates.`);
           } catch (emailError) {
             console.warn('Failed to store email for marketing:', emailError);
-            // Email storage failed but don't bother the user - scan still works
-            toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
+            
+            // Handle email already exists case
+            if (emailError instanceof Error && emailError.message === 'EMAIL_ALREADY_EXISTS') {
+              toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. Looks like you're already using this tool - thanks for your constant support! 🙏`);
+            } else {
+              // Other email storage errors - fail silently
+              toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
+            }
           }
         } else {
           toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
