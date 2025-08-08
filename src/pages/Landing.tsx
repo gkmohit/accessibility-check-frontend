@@ -10,7 +10,9 @@ import {
   Shield, 
   BarChart3, 
   Globe,
-  Users
+  Users,
+  Loader,
+  XCircle
 } from 'lucide-react';
 import { scanService, emailService } from '../services/api';
 
@@ -79,6 +81,7 @@ const NavLink = styled.a`
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
+  cursor: pointer;
   
   &:hover {
     color: #6c5ce7;
@@ -99,6 +102,16 @@ const HealthStatus = styled.div<{ status: 'checking' | 'healthy' | 'error' }>`
   color: ${props => 
     props.status === 'healthy' ? '#155724' : 
     props.status === 'error' ? '#721c24' : '#856404'};
+  cursor: ${props => props.status === 'error' ? 'pointer' : 'default'};
+  transition: all 0.3s ease;
+  
+  ${props => props.status === 'error' && `
+    &:hover {
+      background: #f5c6cb;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+    }
+  `}
 `;
 
 const HeroSection = styled.section`
@@ -463,6 +476,7 @@ export const Landing: React.FC = () => {
   const [scanType, setScanType] = useState<'immediate' | 'scheduled'>('immediate');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     url: '',
     scheduledTime: '',
@@ -482,6 +496,48 @@ export const Landing: React.FC = () => {
     }
   };
 
+  const handleHealthStatusClick = async () => {
+    if (healthStatus === 'error') {
+      // Show initial message
+      toast.info('🚀 Waking up the server! This tool is completely free, so please be patient while we boot up the server - this may take a minute or so. Thanks for your understanding!', {
+        autoClose: 10000
+      });
+
+      // Start checking the backend periodically
+      setHealthStatus('checking');
+      
+      // Try to ping the backend immediately
+      try {
+        await scanService.checkHealth();
+        setHealthStatus('healthy');
+        toast.success('🎉 Server is now online and ready!', { autoClose: 5000 });
+        return;
+      } catch (error) {
+        // Server still not ready, start periodic checking
+      }
+
+      // Check every 3 seconds for up to 2 minutes
+      let attempts = 0;
+      const maxAttempts = 40; // 40 attempts × 3 seconds = 2 minutes
+      
+      const checkInterval = setInterval(async () => {
+        attempts++;
+        try {
+          await scanService.checkHealth();
+          setHealthStatus('healthy');
+          toast.success('🎉 Server is now online and ready!', { autoClose: 5000 });
+          clearInterval(checkInterval);
+        } catch (error) {
+          if (attempts >= maxAttempts) {
+            setHealthStatus('error');
+            toast.error('Server is taking longer than expected. Please try again later.', { autoClose: 8000 });
+            clearInterval(checkInterval);
+          }
+        }
+      }, 3000);
+    }
+  };
+
   const handleScanSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.url) return;
@@ -494,15 +550,15 @@ export const Landing: React.FC = () => {
         // Store email for marketing if user opted in
         if (formData.marketingEmails) {
           try {
-            await emailService.storeEmail(formData.email);
-            toast.success(`Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our marketing updates.`);
+            await emailService.storeEmail(formData.email, formData.name);
+            toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}. You've been subscribed to our updates.`);
           } catch (emailError) {
             console.warn('Failed to store email for marketing:', emailError);
-            toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
-            toast.warning('We couldn\'t subscribe you to marketing emails at this time. Please try again later.');
+            toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
+            toast.warning('⚠️ Scan started successfully, but we couldn\'t save your email for updates. Your scan will still complete normally.');
           }
         } else {
-          toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
+          toast.success(`✅ Scan queued successfully! Job ID: ${result.job_id}`);
         }
       } else {
         // For now, just show coming soon message
@@ -510,7 +566,7 @@ export const Landing: React.FC = () => {
       }
       
       // Reset form
-      setFormData({ email: '', url: '', scheduledTime: '', marketingEmails: false });
+      setFormData({ name: '', email: '', url: '', scheduledTime: '', marketingEmails: false });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to start scan');
     } finally {
@@ -529,16 +585,17 @@ export const Landing: React.FC = () => {
           <NavLinks>
             <NavLink href="#features">Features</NavLink>
             <NavLink href="#tools">Tools</NavLink>
-            <NavLink href="/support">Support</NavLink>
-            <NavLink href="/privacy">Privacy</NavLink>
-            <NavLink href="/terms">Terms</NavLink>
+            <NavLink onClick={() => navigate('/support')}>Support</NavLink>
+            <NavLink onClick={() => navigate('/privacy')}>Privacy</NavLink>
+            <NavLink onClick={() => navigate('/terms')}>Terms</NavLink>
           </NavLinks>
-          <HealthStatus status={healthStatus}>
-            {healthStatus === 'checking' && <Clock size={16} />}
-            {healthStatus === 'healthy' && <CheckCircle size={16} />}
-            {healthStatus === 'error' && <Shield size={16} />}
-            {healthStatus === 'checking' ? 'Checking...' : 
-             healthStatus === 'healthy' ? 'API Healthy' : 'API Offline'}
+                    <HealthStatus status={healthStatus} onClick={handleHealthStatusClick}>
+            {healthStatus === 'checking' && <Loader className="icon" />}
+            {healthStatus === 'healthy' && <CheckCircle className="icon" />}
+            {healthStatus === 'error' && <XCircle className="icon" />}
+            {healthStatus === 'checking' && 'Checking API...'}
+            {healthStatus === 'healthy' && 'API Online'}
+            {healthStatus === 'error' && 'Click here to wake the server up'}
           </HealthStatus>
         </Nav>
       </Header>
@@ -556,6 +613,17 @@ export const Landing: React.FC = () => {
         <ScanForm>
           <FormTitle>Start Your Accessibility Scan</FormTitle>
           <form onSubmit={handleScanSubmit}>
+            <FormGroup>
+              <Label>Your Name</Label>
+              <Input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Your name"
+                required
+              />
+            </FormGroup>
+
             <FormGroup>
               <Label>Email Address</Label>
               <Input
@@ -763,9 +831,9 @@ export const Landing: React.FC = () => {
             <FooterSection>
               <h4>Legal</h4>
               <ul>
-                <li><a href="/privacy">Privacy Policy</a></li>
-                <li><a href="/terms">Terms of Service</a></li>
-                <li><a href="/support">Support</a></li>
+                <li><NavLink onClick={() => navigate('/privacy')}>Privacy Policy</NavLink></li>
+                <li><NavLink onClick={() => navigate('/terms')}>Terms of Service</NavLink></li>
+                <li><NavLink onClick={() => navigate('/support')}>Support</NavLink></li>
               </ul>
             </FooterSection>
           </FooterGrid>

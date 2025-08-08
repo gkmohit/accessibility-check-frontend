@@ -2,8 +2,8 @@ import axios from 'axios';
 import { ScanRequest, ScanResult, ApiResponse, DashboardStats } from '../types';
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? 'http://127.0.0.1:8000' // Use 127.0.0.1 to match backend CORS settings
-  : process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+  ? 'http://127.0.0.1:8000' // Local development
+  : 'https://accessibility-check-backend.onrender.com'; // Production backend
 
 const api = axios.create({
   baseURL: API_BASE_URL,
