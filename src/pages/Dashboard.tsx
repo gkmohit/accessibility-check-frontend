@@ -22,6 +22,7 @@ import { DashboardStats, ScanRequest } from '../types';
 import { scanService } from '../services/api';
 import Loading from '../components/Loading';
 import HealthCheck from '../components/HealthCheck';
+import Troubleshoot from '../components/Troubleshoot';
 import { toast } from 'react-toastify';
 
 const DashboardContainer = styled(Container)`
@@ -269,7 +270,7 @@ const Dashboard: React.FC = () => {
     setTestLoading(true);
     try {
       const response = await scanService.runImmediateScan(
-        'test@example.com',
+        'test@gmail.com',
         'https://example.com'
       );
       toast.success(`Test scan queued! Job ID: ${response.job_id}`);
@@ -308,10 +309,12 @@ const Dashboard: React.FC = () => {
 
       <HealthCheck showDetails />
 
+      <Troubleshoot />
+
       <TestSection>
         <TestTitle>Test Backend Connection</TestTitle>
         <TestDescription>
-          Quick test to verify your backend is working correctly. This will run a scan on example.com.
+          Quick test to verify your backend is working correctly. This will run a scan on example.com and send results to test@gmail.com.
         </TestDescription>
         <TestActions>
           <Button 

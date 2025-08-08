@@ -100,7 +100,7 @@ const Header: React.FC = () => {
       <HeaderContainer>
         <Logo to="/">
           <Shield size={28} />
-          AccessibilityPro
+          Scanmesite.com
         </Logo>
 
         <Nav>

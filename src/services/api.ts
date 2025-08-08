@@ -2,14 +2,15 @@ import axios from 'axios';
 import { ScanRequest, ScanResult, ApiResponse, DashboardStats } from '../types';
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' 
-  ? '' // Use proxy in development
-  : process.env.REACT_APP_API_URL || 'http://localhost:8000';
+  ? 'http://127.0.0.1:8000' // Use 127.0.0.1 to match backend CORS settings
+  : process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: false, // Disable credentials for CORS
 });
 
 // Response interceptor for handling errors
@@ -21,9 +22,16 @@ api.interceptors.response.use(
       return Promise.reject(networkError);
     }
     
+    // Check for API error responses
     if (error.response?.data?.error) {
       const apiError = new Error(error.response.data.error);
       return Promise.reject(apiError);
+    }
+    
+    // Handle HTTP status errors
+    if (error.response?.status === 404) {
+      const notFoundError = new Error(`API endpoint not found: ${error.config?.url}`);
+      return Promise.reject(notFoundError);
     }
     
     return Promise.reject(error);

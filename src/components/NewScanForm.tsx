@@ -83,7 +83,14 @@ const schema = yup.object({
   email: yup
     .string()
     .required('Email is required')
-    .email('Please enter a valid email address'),
+    .email('Please enter a valid email address')
+    .test('valid-domain', 'Please use a valid email domain (e.g., gmail.com, company.com)', function(value) {
+      if (!value) return true;
+      // Basic check for common invalid domains
+      const invalidDomains = ['example.com', 'test.com', 'localhost'];
+      const domain = value.split('@')[1];
+      return !invalidDomains.includes(domain);
+    }),
   scheduleType: yup
     .string()
     .required('Schedule type is required')
@@ -253,7 +260,7 @@ const NewScanForm: React.FC = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="your@company.com"
+                placeholder="your.email@gmail.com"
                 error={!!errors.email}
                 {...register('email')}
               />
