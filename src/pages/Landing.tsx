@@ -218,6 +218,40 @@ const DateTimeInput = styled.input`
   }
 `;
 
+const CheckboxGroup = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+`;
+
+const Checkbox = styled.input`
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0.1rem;
+  
+  &:checked {
+    background-color: #6c5ce7;
+    border-color: #6c5ce7;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+  }
+`;
+
+const CheckboxLabel = styled.label`
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  cursor: pointer;
+  flex: 1;
+`;
+
 const StartScanButton = styled.button`
   width: 100%;
   padding: 1rem 2rem;
@@ -431,7 +465,8 @@ export const Landing: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     url: '',
-    scheduledTime: ''
+    scheduledTime: '',
+    marketingEmails: false
   });
 
   useEffect(() => {
@@ -456,13 +491,18 @@ export const Landing: React.FC = () => {
       if (scanType === 'immediate') {
         const result = await scanService.runImmediateScan(formData.email, formData.url);
         toast.success(`Scan queued successfully! Job ID: ${result.job_id}`);
+        
+        // Log marketing preference (you can send this to your backend later)
+        if (formData.marketingEmails) {
+          console.log('User opted in for marketing emails:', formData.email);
+        }
       } else {
         // For now, just show coming soon message
         toast.info('Scheduled scans are coming soon!');
       }
       
       // Reset form
-      setFormData({ email: '', url: '', scheduledTime: '' });
+      setFormData({ email: '', url: '', scheduledTime: '', marketingEmails: false });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to start scan');
     } finally {
@@ -564,6 +604,18 @@ export const Landing: React.FC = () => {
                 />
               </FormGroup>
             )}
+
+            <CheckboxGroup>
+              <Checkbox
+                type="checkbox"
+                id="marketingEmails"
+                checked={formData.marketingEmails}
+                onChange={(e) => setFormData({ ...formData, marketingEmails: e.target.checked })}
+              />
+              <CheckboxLabel htmlFor="marketingEmails">
+                I agree to receive marketing emails about new features, tips, and accessibility best practices.
+              </CheckboxLabel>
+            </CheckboxGroup>
 
             <StartScanButton type="submit" disabled={loading || healthStatus === 'error'}>
               {loading ? (
@@ -688,8 +740,6 @@ export const Landing: React.FC = () => {
               <ul>
                 <li><a href="#features">Features</a></li>
                 <li><a href="#tools">Tools</a></li>
-                <li><a href="/pricing">Pricing</a></li>
-                <li><a href="/api-docs">API Documentation</a></li>
               </ul>
             </FooterSection>
 
@@ -697,7 +747,6 @@ export const Landing: React.FC = () => {
               <h4>Company</h4>
               <ul>
                 <li><a href="/about">About Us</a></li>
-                <li><a href="/careers">Careers</a></li>
                 <li><a href="/blog">Blog</a></li>
                 <li><a href="/contact">Contact</a></li>
               </ul>
@@ -709,7 +758,6 @@ export const Landing: React.FC = () => {
                 <li><a href="/privacy">Privacy Policy</a></li>
                 <li><a href="/terms">Terms of Service</a></li>
                 <li><a href="/support">Support</a></li>
-                <li><a href="/security">Security</a></li>
               </ul>
             </FooterSection>
           </FooterGrid>

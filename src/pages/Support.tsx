@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ArrowLeft, Mail, MessageCircle, BookOpen, HelpCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
@@ -245,6 +245,60 @@ const SubmitButton = styled.button`
   }
 `;
 
+const Footer = styled.footer`
+  background: #333;
+  color: white;
+  padding: 3rem 2rem 1rem;
+  margin-top: 3rem;
+`;
+
+const FooterContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const FooterGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+`;
+
+const FooterSection = styled.div`
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #fd79a8;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    a {
+      color: #ccc;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      
+      &:hover {
+        color: white;
+      }
+    }
+  }
+`;
+
+const FooterBottom = styled.div`
+  border-top: 1px solid #555;
+  padding-top: 1rem;
+  text-align: center;
+  color: #999;
+`;
+
 const faqData = [
   {
     question: "How does Scanmesite.com work?",
@@ -275,29 +329,9 @@ const faqData = [
 export const Support: React.FC = () => {
   const navigate = useNavigate();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
 
   const handleFAQToggle = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the form data to your backend
-    alert('Thank you for your message! We\'ll get back to you soon.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
   };
 
   return (
@@ -323,39 +357,11 @@ export const Support: React.FC = () => {
             </CardIcon>
             <CardTitle>Documentation</CardTitle>
             <CardDescription>
-              Comprehensive guides and API documentation to help you get the most 
+              Comprehensive guides and documentation to help you get the most 
               out of Scanmesite.com's accessibility testing features.
             </CardDescription>
             <CardButton onClick={() => window.open('/docs', '_blank')}>
               View Docs
-            </CardButton>
-          </SupportCard>
-
-          <SupportCard>
-            <CardIcon color="linear-gradient(135deg, #20c997 0%, #6c5ce7 100%)">
-              <MessageCircle size={24} />
-            </CardIcon>
-            <CardTitle>Live Chat</CardTitle>
-            <CardDescription>
-              Chat with our support team in real-time. Available Monday-Friday, 
-              9 AM - 6 PM EST for immediate assistance.
-            </CardDescription>
-            <CardButton onClick={() => alert('Live chat feature coming soon!')}>
-              Start Chat
-            </CardButton>
-          </SupportCard>
-
-          <SupportCard>
-            <CardIcon color="linear-gradient(135deg, #fd79a8 0%, #20c997 100%)">
-              <Mail size={24} />
-            </CardIcon>
-            <CardTitle>Email Support</CardTitle>
-            <CardDescription>
-              Send us a detailed message and we'll get back to you within 24 hours. 
-              Perfect for complex questions or feature requests.
-            </CardDescription>
-            <CardButton onClick={() => document.getElementById('contact-form')?.scrollIntoView()}>
-              Send Email
             </CardButton>
           </SupportCard>
         </SupportGrid>
@@ -375,55 +381,49 @@ export const Support: React.FC = () => {
           ))}
         </FAQSection>
 
-        <ContactForm id="contact-form" onSubmit={handleFormSubmit}>
-          <FormTitle>Contact Us</FormTitle>
-          <FormGrid>
-            <FormGroup>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </FormGroup>
-          </FormGrid>
-          <FormGroup>
-            <Label htmlFor="subject">Subject</Label>
-            <Input
-              type="text"
-              id="subject"
-              name="subject"
-              value={formData.subject}
-              onChange={handleInputChange}
-              required
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label htmlFor="message">Message</Label>
-            <TextArea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              required
-            />
-          </FormGroup>
-          <SubmitButton type="submit">Send Message</SubmitButton>
-        </ContactForm>
+        <Footer>
+          <FooterContainer>
+            <FooterGrid>
+              <FooterSection>
+                <h4>Scanmesite.com</h4>
+                <p>
+                  Making the web accessible for everyone through automated 
+                  accessibility scanning and comprehensive reporting.
+                </p>
+              </FooterSection>
+
+              <FooterSection>
+                <h4>Product</h4>
+                <ul>
+                  <li><a href="#features">Features</a></li>
+                  <li><a href="#tools">Tools</a></li>
+                </ul>
+              </FooterSection>
+
+              <FooterSection>
+                <h4>Company</h4>
+                <ul>
+                  <li><a href="/about">About Us</a></li>
+                  <li><a href="/blog">Blog</a></li>
+                  <li><a href="/contact">Contact</a></li>
+                </ul>
+              </FooterSection>
+
+              <FooterSection>
+                <h4>Legal</h4>
+                <ul>
+                  <li><a href="/privacy">Privacy Policy</a></li>
+                  <li><a href="/terms">Terms of Service</a></li>
+                  <li><a href="/support">Support</a></li>
+                </ul>
+              </FooterSection>
+            </FooterGrid>
+
+            <FooterBottom>
+              <p>&copy; 2025 Scanmesite.com. All rights reserved.</p>
+            </FooterBottom>
+          </FooterContainer>
+        </Footer>
       </ContentWrapper>
     </Container>
   );
