@@ -7,7 +7,6 @@ import {
   Clock, 
   CheckCircle, 
   Zap, 
-  Shield, 
   BarChart3, 
   Globe,
   Users,
@@ -16,27 +15,27 @@ import {
 } from 'lucide-react';
 import { scanService, emailService } from '../services/api';
 
-// Styled components inspired by Monday.com design
-const LandingContainer = styled.div`
+// Styled components with dark mode support
+const LandingContainer = styled.div<{ $isDarkMode: boolean }>`
   min-height: 100vh;
-  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
-  color: white;
-  overflow-x: hidden;
+  background: ${props => props.$isDarkMode ? '#1a1a1a' : '#ffffff'};
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#333333'};
+  transition: all 0.3s ease;
 `;
 
-const Header = styled.header`
+const Header = styled.header<{ $isDarkMode: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  z-index: 100;
+  background: ${props => props.$isDarkMode 
+    ? 'rgba(26, 26, 26, 0.95)' 
+    : 'rgba(255, 255, 255, 0.95)'};
   backdrop-filter: blur(10px);
-  padding: 1rem 2rem;
-  z-index: 1000;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-`;
-
-const Nav = styled.nav`
+  border-bottom: 1px solid ${props => props.$isDarkMode ? '#333333' : '#e0e0e0'};
+  transition: all 0.3s ease;
+`;const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -44,19 +43,21 @@ const Nav = styled.nav`
   margin: 0 auto;
 `;
 
-const Logo = styled.div`
+const Logo = styled.div<{ $isDarkMode: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 800;
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#0091ae'};
+  text-decoration: none;
+  transition: color 0.3s ease;
 `;
 
 const LogoIcon = styled.div`
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
+  background: #0091ae;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -76,8 +77,8 @@ const NavLinks = styled.div`
   }
 `;
 
-const NavLink = styled.a`
-  color: #666;
+const NavLink = styled.a<{ $isDarkMode: boolean }>`
+  color: ${props => props.$isDarkMode ? '#cccccc' : '#666666'};
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -88,75 +89,138 @@ const NavLink = styled.a`
   }
 `;
 
-const HealthStatus = styled.div<{ status: 'checking' | 'healthy' | 'error' }>`
+const DarkModeToggle = styled.button<{ $isDarkMode: boolean }>`
+  background: ${props => props.$isDarkMode ? '#333333' : '#f0f0f0'};
+  border: 2px solid ${props => props.$isDarkMode ? '#555555' : '#dddddd'};
+  border-radius: 20px;
+  width: 50px;
+  height: 26px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: ${props => props.$isDarkMode ? '23px' : '1px'};
+    width: 20px;
+    height: 20px;
+    background: ${props => props.$isDarkMode ? '#ffffff' : '#0091ae'};
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+`;
+
+const HealthStatus = styled.div<{ $status: 'checking' | 'healthy' | 'error' }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  background: ${props => 
-    props.status === 'healthy' ? '#d4edda' : 
-    props.status === 'error' ? '#f8d7da' : '#fff3cd'};
-  color: ${props => 
-    props.status === 'healthy' ? '#155724' : 
-    props.status === 'error' ? '#721c24' : '#856404'};
-  cursor: ${props => props.status === 'error' ? 'pointer' : 'default'};
+  cursor: ${props => props.$status === 'error' ? 'pointer' : 'default'};
   transition: all 0.3s ease;
   
-  ${props => props.status === 'error' && `
-    &:hover {
-      background: #f5c6cb;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+  background: ${props => {
+    switch (props.$status) {
+      case 'checking': return 'rgba(255, 193, 7, 0.1)';
+      case 'healthy': return 'rgba(40, 167, 69, 0.1)';
+      case 'error': return 'rgba(220, 53, 69, 0.1)';
+      default: return 'rgba(108, 117, 125, 0.1)';
     }
-  `}
-`;
-
-const HeroSection = styled.section`
-  padding: 8rem 2rem 4rem;
-  text-align: center;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const HeroTitle = styled.h1`
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  }};
   
-  @media (max-width: 768px) {
-    font-size: 2.5rem;
+  color: ${props => {
+    switch (props.$status) {
+      case 'checking': return '#856404';
+      case 'healthy': return '#155724';
+      case 'error': return '#721c24';
+      default: return '#495057';
+    }
+  }};
+  
+  &:hover {
+    transform: ${props => props.$status === 'error' ? 'scale(1.05)' : 'none'};
+  }
+  
+  .icon {
+    width: 16px;
+    height: 16px;
   }
 `;
 
-const HeroSubtitle = styled.p`
-  font-size: 1.25rem;
-  margin-bottom: 3rem;
-  opacity: 0.9;
-  line-height: 1.6;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+const HeroSection = styled.section<{ $isDarkMode: boolean }>`
+  padding: 8rem 2rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#000000'};
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
 `;
 
-const ScanForm = styled.div`
-  background: rgba(255, 255, 255, 0.95);
+const HeroContent = styled.div`
+  text-align: left;
+  
+  @media (max-width: 968px) {
+    text-align: center;
+    order: 1;
+  }
+`;
+
+const HeroTitle = styled.h1<{ $isDarkMode: boolean }>`
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#1a1a1a'};
+  
+  @media (max-width: 968px) {
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const HeroSubtitle = styled.p<{ $isDarkMode: boolean }>`
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  color: ${props => props.$isDarkMode ? '#cccccc' : '#666666'};
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+`;
+
+const FormContainer = styled.div`
+  @media (max-width: 968px) {
+    order: 2;
+  }
+`;
+
+const ScanForm = styled.div<{ $isDarkMode: boolean }>`
+  background: ${props => props.$isDarkMode ? 'rgba(42, 42, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
   border-radius: 16px;
   padding: 2rem;
-  max-width: 500px;
-  margin: 0 auto 3rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  box-shadow: 0 20px 40px ${props => props.$isDarkMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'};
   backdrop-filter: blur(10px);
+  border: 1px solid ${props => props.$isDarkMode ? '#444444' : 'transparent'};
 `;
 
-const FormTitle = styled.h3`
-  color: #333;
+const FormTitle = styled.h3<{ $isDarkMode: boolean }>`
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#333333'};
   margin-bottom: 1.5rem;
   font-size: 1.25rem;
   font-weight: 600;
@@ -167,25 +231,31 @@ const FormGroup = styled.div`
   text-align: left;
 `;
 
-const Label = styled.label`
+const Label = styled.label<{ $isDarkMode: boolean }>`
   display: block;
   margin-bottom: 0.5rem;
-  color: #555;
+  color: ${props => props.$isDarkMode ? '#cccccc' : '#555555'};
   font-weight: 500;
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ $isDarkMode: boolean }>`
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid ${props => props.$isDarkMode ? '#555555' : '#e0e0e0'};
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s ease;
+  background: ${props => props.$isDarkMode ? '#333333' : '#ffffff'};
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#333333'};
   
   &:focus {
     outline: none;
     border-color: #0091ae;
     box-shadow: 0 0 0 3px rgba(0, 145, 174, 0.1);
+  }
+  
+  &::placeholder {
+    color: ${props => props.$isDarkMode ? '#888888' : '#999999'};
   }
 `;
 
@@ -195,12 +265,12 @@ const ScanTypeSelector = styled.div`
   margin-bottom: 1.5rem;
 `;
 
-const ScanTypeButton = styled.button<{ active: boolean }>`
+const ScanTypeButton = styled.button<{ $active: boolean; $isDarkMode: boolean }>`
   flex: 1;
   padding: 0.75rem 1rem;
-  border: 2px solid ${props => props.active ? '#0091ae' : '#e0e0e0'};
-  background: ${props => props.active ? '#0091ae' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  border: 2px solid ${props => props.$active ? '#0091ae' : (props.$isDarkMode ? '#555555' : '#e0e0e0')};
+  background: ${props => props.$active ? '#0091ae' : (props.$isDarkMode ? '#333333' : 'white')};
+  color: ${props => props.$active ? 'white' : (props.$isDarkMode ? '#cccccc' : '#666666')};
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
@@ -212,17 +282,19 @@ const ScanTypeButton = styled.button<{ active: boolean }>`
   
   &:hover {
     border-color: #0091ae;
-    background: ${props => props.active ? '#007a94' : '#f0f9fb'};
+    background: ${props => props.$active ? '#007a94' : (props.$isDarkMode ? '#444444' : '#f0f9fb')};
   }
 `;
 
-const DateTimeInput = styled.input`
+const DateTimeInput = styled.input<{ $isDarkMode: boolean }>`
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid ${props => props.$isDarkMode ? '#555555' : '#e0e0e0'};
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.3s ease;
+  background: ${props => props.$isDarkMode ? '#333333' : '#ffffff'};
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#333333'};
   
   &:focus {
     outline: none;
@@ -231,17 +303,17 @@ const DateTimeInput = styled.input`
   }
 `;
 
-const CheckboxGroup = styled.div`
+const CheckboxGroup = styled.div<{ $isDarkMode: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 `;
 
-const Checkbox = styled.input`
+const Checkbox = styled.input<{ $isDarkMode: boolean }>`
   width: 1.2rem;
   height: 1.2rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid ${props => props.$isDarkMode ? '#555555' : '#e0e0e0'};
   border-radius: 4px;
   cursor: pointer;
   margin-top: 0.1rem;
@@ -257,18 +329,18 @@ const Checkbox = styled.input`
   }
 `;
 
-const CheckboxLabel = styled.label`
-  color: #555;
+const CheckboxLabel = styled.label<{ $isDarkMode: boolean }>`
+  color: ${props => props.$isDarkMode ? '#cccccc' : '#555555'};
   font-size: 0.9rem;
   line-height: 1.4;
   cursor: pointer;
   flex: 1;
 `;
 
-const StartScanButton = styled.button`
+const StartScanButton = styled.button<{ $isDarkMode: boolean }>`
   width: 100%;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
+  background: #0091ae;
   color: white;
   border: none;
   border-radius: 8px;
@@ -282,6 +354,7 @@ const StartScanButton = styled.button`
   gap: 0.5rem;
   
   &:hover {
+    background: #007a94;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 145, 174, 0.3);
   }
@@ -290,6 +363,7 @@ const StartScanButton = styled.button`
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    background: ${props => props.$isDarkMode ? '#555555' : '#cccccc'};
   }
 `;
 
@@ -407,8 +481,8 @@ const ToolLogo = styled.div`
   font-weight: bold;
 `;
 
-const Footer = styled.footer`
-  background: #333;
+const Footer = styled.footer<{ $isDarkMode: boolean }>`
+  background: ${props => props.$isDarkMode ? '#222222' : '#333333'};
   color: white;
   padding: 3rem 2rem 1rem;
 `;
@@ -425,7 +499,7 @@ const FooterGrid = styled.div`
   margin-bottom: 2rem;
 `;
 
-const FooterSection = styled.div`
+const FooterSection = styled.div<{ $isDarkMode: boolean }>`
   h4 {
     font-size: 1.1rem;
     font-weight: 600;
@@ -442,7 +516,7 @@ const FooterSection = styled.div`
     }
     
     a {
-      color: #ccc;
+      color: ${props => props.$isDarkMode ? '#dddddd' : '#cccccc'};
       text-decoration: none;
       transition: color 0.3s ease;
       
@@ -453,11 +527,11 @@ const FooterSection = styled.div`
   }
 `;
 
-const FooterBottom = styled.div`
-  border-top: 1px solid #555;
+const FooterBottom = styled.div<{ $isDarkMode: boolean }>`
+  border-top: 1px solid ${props => props.$isDarkMode ? '#444444' : '#555555'};
   padding-top: 1rem;
   text-align: center;
-  color: #999;
+  color: ${props => props.$isDarkMode ? '#aaaaaa' : '#999999'};
 `;
 
 const ComingSoonBadge = styled.span`
@@ -470,28 +544,21 @@ const ComingSoonBadge = styled.span`
   margin-left: 0.5rem;
 `;
 
-const ProgressTracker = styled.div<{ isActive: boolean }>`
+const ProgressTracker = styled.div<{ $isActive: boolean }>`
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  z-index: 10000;
-  min-width: 400px;
-  max-width: 500px;
-  display: ${props => props.isActive ? 'block' : 'none'};
-  
-  @media (max-width: 480px) {
-    min-width: 320px;
-    margin: 1rem;
-    padding: 1.5rem;
-  }
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 145, 174, 0.95);
+  color: white;
+  padding: 1rem;
+  z-index: 1000;
+  transform: ${props => props.$isActive ? 'translateY(0)' : 'translateY(-100%)'};
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
-const ProgressOverlay = styled.div<{ isActive: boolean }>`
+const ProgressOverlay = styled.div<{ $isActive: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -499,7 +566,7 @@ const ProgressOverlay = styled.div<{ isActive: boolean }>`
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   z-index: 9999;
-  display: ${props => props.isActive ? 'block' : 'none'};
+  display: ${props => props.$isActive ? 'block' : 'none'};
 `;
 
 const ProgressHeader = styled.div`
@@ -524,12 +591,12 @@ const ProgressSteps = styled.div`
   margin-bottom: 2rem;
 `;
 
-const ProgressStep = styled.div<{ isActive: boolean; isCompleted: boolean }>`
+const ProgressStep = styled.div<{ $isActive: boolean; $isCompleted: boolean }>`
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 0;
-  opacity: ${props => props.isActive || props.isCompleted ? 1 : 0.4};
+  opacity: ${props => props.$isActive || props.$isCompleted ? 1 : 0.4};
   
   .step-number {
     width: 32px;
@@ -541,22 +608,22 @@ const ProgressStep = styled.div<{ isActive: boolean; isCompleted: boolean }>`
     font-weight: 600;
     font-size: 0.9rem;
     background: ${props => 
-      props.isCompleted ? '#28a745' : 
-      props.isActive ? '#0091ae' : '#e9ecef'};
+      props.$isCompleted ? '#28a745' : 
+      props.$isActive ? '#0091ae' : '#e9ecef'};
     color: ${props => 
-      props.isCompleted || props.isActive ? 'white' : '#666'};
+      props.$isCompleted || props.$isActive ? 'white' : '#666'};
     flex-shrink: 0;
   }
   
   .step-text {
     flex: 1;
-    color: ${props => props.isActive ? '#333' : '#666'};
-    font-weight: ${props => props.isActive ? 600 : 400};
+    color: ${props => props.$isActive ? '#333' : '#666'};
+    font-weight: ${props => props.$isActive ? 600 : 400};
   }
   
   .step-icon {
-    color: ${props => props.isCompleted ? '#28a745' : '#0091ae'};
-    display: ${props => props.isActive && !props.isCompleted ? 'block' : 'none'};
+    color: ${props => props.$isCompleted ? '#28a745' : '#0091ae'};
+    display: ${props => props.$isActive && !props.$isCompleted ? 'block' : 'none'};
     animation: spin 1s linear infinite;
   }
   
@@ -575,12 +642,12 @@ const ProgressBar = styled.div`
   margin-bottom: 1rem;
 `;
 
-const ProgressBarFill = styled.div<{ progress: number }>`
+const ProgressBarFill = styled.div<{ $progress: number }>`
   height: 100%;
   background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
   border-radius: 4px;
   transition: width 0.5s ease;
-  width: ${props => props.progress}%;
+  width: ${props => props.$progress}%;
 `;
 
 const JobIdDisplay = styled.div`
@@ -600,6 +667,7 @@ const JobIdDisplay = styled.div`
 
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'error'>('checking');
   const [scanType, setScanType] = useState<'immediate' | 'scheduled'>('immediate');
   const [loading, setLoading] = useState(false);
@@ -762,24 +830,24 @@ export const Landing: React.FC = () => {
   };
 
   return (
-    <LandingContainer>
-      <ProgressOverlay isActive={scanProgress.isActive} />
-      <ProgressTracker isActive={scanProgress.isActive}>
+    <LandingContainer $isDarkMode={isDarkMode}>
+      <ProgressOverlay $isActive={scanProgress.isActive} />
+      <ProgressTracker $isActive={scanProgress.isActive}>
         <ProgressHeader>
           <h3>🔍 Accessibility Scan in Progress</h3>
           <p>Please wait while we analyze your website...</p>
         </ProgressHeader>
         
         <ProgressBar>
-          <ProgressBarFill progress={(scanProgress.currentStep / scanProgress.totalSteps) * 100} />
+          <ProgressBarFill $progress={(scanProgress.currentStep / scanProgress.totalSteps) * 100} />
         </ProgressBar>
         
         <ProgressSteps>
           {progressSteps.map((step, index) => (
             <ProgressStep 
               key={step.id}
-              isActive={scanProgress.currentStep === step.id}
-              isCompleted={scanProgress.currentStep > step.id}
+              $isActive={scanProgress.currentStep === step.id}
+              $isCompleted={scanProgress.currentStep > step.id}
             >
               <div className="step-number">
                 {scanProgress.currentStep > step.id ? '✓' : step.id}
@@ -811,20 +879,25 @@ export const Landing: React.FC = () => {
         )}
       </ProgressTracker>
 
-      <Header>
+      <Header $isDarkMode={isDarkMode}>
         <Nav>
-          <Logo>
+          <Logo $isDarkMode={isDarkMode}>
             <LogoIcon>S</LogoIcon>
             Scanmesite.com
           </Logo>
           <NavLinks>
-            <NavLink href="#features">Features</NavLink>
-            <NavLink href="#tools">Tools</NavLink>
-            <NavLink onClick={() => navigate('/support')}>Support</NavLink>
-            <NavLink onClick={() => navigate('/privacy')}>Privacy</NavLink>
-            <NavLink onClick={() => navigate('/terms')}>Terms</NavLink>
+            <NavLink $isDarkMode={isDarkMode} href="#features">Features</NavLink>
+            <NavLink $isDarkMode={isDarkMode} href="#tools">Tools</NavLink>
+            <NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/support')}>Support</NavLink>
+            <NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/privacy')}>Privacy</NavLink>
+            <NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/terms')}>Terms</NavLink>
+            <DarkModeToggle 
+              $isDarkMode={isDarkMode} 
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            />
           </NavLinks>
-                    <HealthStatus status={healthStatus} onClick={handleHealthStatusClick}>
+                    <HealthStatus $status={healthStatus} onClick={handleHealthStatusClick}>
             {healthStatus === 'checking' && <Loader className="icon" />}
             {healthStatus === 'healthy' && <CheckCircle className="icon" />}
             {healthStatus === 'error' && <XCircle className="icon" />}
@@ -835,111 +908,122 @@ export const Landing: React.FC = () => {
         </Nav>
       </Header>
 
-      <HeroSection>
-        <HeroTitle>
-          Make Your Website Accessible to Everyone
-        </HeroTitle>
-        <HeroSubtitle>
-          Automated accessibility scanning powered by Lighthouse and DOM analysis. 
-          Get comprehensive reports delivered to your inbox and ensure your website 
-          complies with WCAG guidelines.
-        </HeroSubtitle>
-
-        <ScanForm>
-          <FormTitle>Start Your Accessibility Scan</FormTitle>
-          <form onSubmit={handleScanSubmit}>
-            <FormGroup>
-              <Label>Your Name</Label>
-              <Input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Your name"
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>Email Address</Label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="your@email.com"
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>Website URL</Label>
-              <Input
-                type="url"
-                value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                placeholder="https://yourwebsite.com"
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>Scan Type</Label>
-              <ScanTypeSelector>
-                <ScanTypeButton
-                  type="button"
-                  active={scanType === 'immediate'}
-                  onClick={() => setScanType('immediate')}
-                >
-                  <Play size={16} />
-                  Run Now
-                </ScanTypeButton>
-                <ScanTypeButton
-                  type="button"
-                  active={scanType === 'scheduled'}
-                  onClick={() => setScanType('scheduled')}
-                >
-                  <Clock size={16} />
-                  Schedule
-                  <ComingSoonBadge>Soon</ComingSoonBadge>
-                </ScanTypeButton>
-              </ScanTypeSelector>
-            </FormGroup>
-
-            {scanType === 'scheduled' && (
+      <HeroSection $isDarkMode={isDarkMode}>
+        <FormContainer>
+          <ScanForm $isDarkMode={isDarkMode}>
+            <FormTitle $isDarkMode={isDarkMode}>Start Your Accessibility Scan</FormTitle>
+            <form onSubmit={handleScanSubmit}>
               <FormGroup>
-                <Label>Scheduled Time</Label>
-                <DateTimeInput
-                  type="datetime-local"
-                  value={formData.scheduledTime}
-                  onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
-                  min={new Date().toISOString().slice(0, 16)}
+                <Label $isDarkMode={isDarkMode}>Your Name</Label>
+                <Input
+                  $isDarkMode={isDarkMode}
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Your name"
+                  required
                 />
               </FormGroup>
-            )}
 
-            <CheckboxGroup>
-              <Checkbox
-                type="checkbox"
-                id="marketingEmails"
-                checked={formData.marketingEmails}
-                onChange={(e) => setFormData({ ...formData, marketingEmails: e.target.checked })}
-              />
-              <CheckboxLabel htmlFor="marketingEmails">
-                I agree to receive marketing emails about new features, tips, and accessibility best practices.
-              </CheckboxLabel>
-            </CheckboxGroup>
+              <FormGroup>
+                <Label $isDarkMode={isDarkMode}>Email Address</Label>
+                <Input
+                  $isDarkMode={isDarkMode}
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="your@email.com"
+                  required
+                />
+              </FormGroup>
 
-            <StartScanButton type="submit" disabled={loading || healthStatus === 'error'}>
-              {loading ? (
-                <span>Loading...</span>
-              ) : (
-                <>
-                  <Zap size={20} />
-                  Start Accessibility Scan
-                </>
+              <FormGroup>
+                <Label $isDarkMode={isDarkMode}>Website URL</Label>
+                <Input
+                  $isDarkMode={isDarkMode}
+                  type="url"
+                  value={formData.url}
+                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                  placeholder="https://yourwebsite.com"
+                  required
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <Label $isDarkMode={isDarkMode}>Scan Type</Label>
+                <ScanTypeSelector>
+                  <ScanTypeButton
+                    type="button"
+                    $active={scanType === 'immediate'}
+                    $isDarkMode={isDarkMode}
+                    onClick={() => setScanType('immediate')}
+                  >
+                    <Play size={16} />
+                    Run Now
+                  </ScanTypeButton>
+                  <ScanTypeButton
+                    type="button"
+                    $active={scanType === 'scheduled'}
+                    $isDarkMode={isDarkMode}
+                    onClick={() => setScanType('scheduled')}
+                  >
+                    <Clock size={16} />
+                    Schedule
+                    <ComingSoonBadge>Soon</ComingSoonBadge>
+                  </ScanTypeButton>
+                </ScanTypeSelector>
+              </FormGroup>
+
+              {scanType === 'scheduled' && (
+                <FormGroup>
+                  <Label $isDarkMode={isDarkMode}>Scheduled Time</Label>
+                  <DateTimeInput
+                    $isDarkMode={isDarkMode}
+                    type="datetime-local"
+                    value={formData.scheduledTime}
+                    onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                </FormGroup>
               )}
-            </StartScanButton>
-          </form>
-        </ScanForm>
+
+              <CheckboxGroup $isDarkMode={isDarkMode}>
+                <Checkbox
+                  $isDarkMode={isDarkMode}
+                  type="checkbox"
+                  id="marketingEmails"
+                  checked={formData.marketingEmails}
+                  onChange={(e) => setFormData({ ...formData, marketingEmails: e.target.checked })}
+                />
+                <CheckboxLabel $isDarkMode={isDarkMode} htmlFor="marketingEmails">
+                  I agree to receive marketing emails about new features, tips, and accessibility best practices.
+                </CheckboxLabel>
+              </CheckboxGroup>
+
+              <StartScanButton $isDarkMode={isDarkMode} type="submit" disabled={loading || healthStatus === 'error'}>
+                {loading ? (
+                  <span>Loading...</span>
+                ) : (
+                  <>
+                    <Zap size={20} />
+                    Start Accessibility Scan
+                  </>
+                )}
+              </StartScanButton>
+            </form>
+          </ScanForm>
+        </FormContainer>
+
+        <HeroContent>
+          <HeroTitle $isDarkMode={isDarkMode}>
+            Make Your Website Accessible to Everyone
+          </HeroTitle>
+          <HeroSubtitle $isDarkMode={isDarkMode}>
+            Automated accessibility scanning powered by Lighthouse and DOM analysis. 
+            Get comprehensive reports delivered to your inbox and ensure your website 
+            complies with WCAG guidelines.
+          </HeroSubtitle>
+        </HeroContent>
       </HeroSection>
 
       <FeaturesSection id="features">
@@ -1035,10 +1119,10 @@ export const Landing: React.FC = () => {
         </FeaturesContainer>
       </ToolsSection>
 
-      <Footer>
+      <Footer $isDarkMode={isDarkMode}>
         <FooterContainer>
           <FooterGrid>
-            <FooterSection>
+            <FooterSection $isDarkMode={isDarkMode}>
               <h4>Scanmesite.com</h4>
               <p>
                 Making the web accessible for everyone through automated 
@@ -1046,7 +1130,7 @@ export const Landing: React.FC = () => {
               </p>
             </FooterSection>
 
-            <FooterSection>
+            <FooterSection $isDarkMode={isDarkMode}>
               <h4>Product</h4>
               <ul>
                 <li><a href="#features">Features</a></li>
@@ -1054,7 +1138,7 @@ export const Landing: React.FC = () => {
               </ul>
             </FooterSection>
 
-            <FooterSection>
+            <FooterSection $isDarkMode={isDarkMode}>
               <h4>Company</h4>
               <ul>
                 <li><a href="/about">About Us</a></li>
@@ -1063,17 +1147,17 @@ export const Landing: React.FC = () => {
               </ul>
             </FooterSection>
 
-            <FooterSection>
+            <FooterSection $isDarkMode={isDarkMode}>
               <h4>Legal</h4>
               <ul>
-                <li><NavLink onClick={() => navigate('/privacy')}>Privacy Policy</NavLink></li>
-                <li><NavLink onClick={() => navigate('/terms')}>Terms of Service</NavLink></li>
-                <li><NavLink onClick={() => navigate('/support')}>Support</NavLink></li>
+                <li><NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/privacy')}>Privacy Policy</NavLink></li>
+                <li><NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/terms')}>Terms of Service</NavLink></li>
+                <li><NavLink $isDarkMode={isDarkMode} onClick={() => navigate('/support')}>Support</NavLink></li>
               </ul>
             </FooterSection>
           </FooterGrid>
 
-          <FooterBottom>
+          <FooterBottom $isDarkMode={isDarkMode}>
             <p>&copy; 2025 Scanmesite.com. All rights reserved.</p>
           </FooterBottom>
         </FooterContainer>
