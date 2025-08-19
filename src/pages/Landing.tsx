@@ -11,7 +11,8 @@ import {
   Globe,
   Users,
   Loader,
-  XCircle
+  XCircle,
+  Menu
 } from 'lucide-react';
 import { scanService, emailService } from '../services/api';
 
@@ -30,17 +31,25 @@ const Header = styled.header<{ $isDarkMode: boolean }>`
   right: 0;
   z-index: 100;
   background: ${props => props.$isDarkMode 
-    ? 'rgba(26, 26, 26, 0.95)' 
-    : 'rgba(255, 255, 255, 0.95)'};
-  backdrop-filter: blur(10px);
+    ? 'rgba(26, 26, 26, 0.98)' 
+    : 'rgba(255, 255, 255, 0.98)'};
+  backdrop-filter: blur(15px);
   border-bottom: 1px solid ${props => props.$isDarkMode ? '#333333' : '#e0e0e0'};
   transition: all 0.3s ease;
-`;const Nav = styled.nav`
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+`;
+
+const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  height: 70px;
 `;
 
 const Logo = styled.div<{ $isDarkMode: boolean }>`
@@ -51,26 +60,52 @@ const Logo = styled.div<{ $isDarkMode: boolean }>`
   font-weight: 800;
   color: ${props => props.$isDarkMode ? '#ffffff' : '#0091ae'};
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const LogoIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: #0091ae;
-  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #0091ae 0%, #007a94 100%);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  box-shadow: 0 4px 12px rgba(0, 145, 174, 0.3);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 145, 174, 0.4);
+  }
+  
+  @media (max-width: 768px) {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
 `;
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: center;
+  
+  @media (max-width: 968px) {
+    gap: 1.5rem;
+  }
   
   @media (max-width: 768px) {
     display: none;
@@ -80,35 +115,118 @@ const NavLinks = styled.div`
 const NavLink = styled.a<{ $isDarkMode: boolean }>`
   color: ${props => props.$isDarkMode ? '#cccccc' : '#666666'};
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
   
   &:hover {
     color: #0091ae;
+    background: ${props => props.$isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 145, 174, 0.1)'};
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 const DarkModeToggle = styled.button<{ $isDarkMode: boolean }>`
-  background: ${props => props.$isDarkMode ? '#333333' : '#f0f0f0'};
-  border: 2px solid ${props => props.$isDarkMode ? '#555555' : '#dddddd'};
-  border-radius: 20px;
-  width: 50px;
-  height: 26px;
+  background: ${props => props.$isDarkMode ? '#444444' : '#f5f5f5'};
+  border: 2px solid ${props => props.$isDarkMode ? '#666666' : '#e0e0e0'};
+  border-radius: 25px;
+  width: 54px;
+  height: 30px;
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: ${props => props.$isDarkMode 
+    ? 'inset 0 2px 4px rgba(0, 0, 0, 0.3)' 
+    : 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'};
+  
+  &:hover {
+    transform: scale(1.05);
+    border-color: #0091ae;
+  }
   
   &:before {
-    content: '';
+    content: '${props => props.$isDarkMode ? '🌙' : '☀️'}';
     position: absolute;
-    top: 1px;
-    left: ${props => props.$isDarkMode ? '23px' : '1px'};
+    top: 50%;
+    left: ${props => props.$isDarkMode ? '26px' : '4px'};
+    transform: translateY(-50%);
     width: 20px;
     height: 20px;
     background: ${props => props.$isDarkMode ? '#ffffff' : '#0091ae'};
     border-radius: 50%;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const MobileMenuButton = styled.button<{ $isDarkMode: boolean }>`
+  display: none;
+  background: none;
+  border: none;
+  color: ${props => props.$isDarkMode ? '#ffffff' : '#666666'};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.$isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+  }
+  
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const MobileMenu = styled.div<{ $isOpen: boolean; $isDarkMode: boolean }>`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: ${props => props.$isDarkMode ? '#1a1a1a' : '#ffffff'};
+  border-bottom: 1px solid ${props => props.$isDarkMode ? '#333333' : '#e0e0e0'};
+  transform: translateY(${props => props.$isOpen ? '0' : '-100%'});
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const MobileMenuLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 0.5rem;
+`;
+
+const MobileNavLink = styled.a<{ $isDarkMode: boolean }>`
+  color: ${props => props.$isDarkMode ? '#cccccc' : '#666666'};
+  text-decoration: none;
+  font-weight: 600;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    color: #0091ae;
+    background: ${props => props.$isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 145, 174, 0.1)'};
   }
 `;
 
@@ -546,16 +664,27 @@ const ComingSoonBadge = styled.span`
 
 const ProgressTracker = styled.div<{ $isActive: boolean }>`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 145, 174, 0.95);
-  color: white;
-  padding: 1rem;
-  z-index: 1000;
-  transform: ${props => props.$isActive ? 'translateY(0)' : 'translateY(-100%)'};
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) ${props => props.$isActive ? 'scale(1)' : 'scale(0.8)'};
+  background: white;
+  color: #333333;
+  border-radius: 16px;
+  padding: 2rem;
+  z-index: 10000;
+  min-width: 500px;
+  max-width: 600px;
+  width: 90vw;
+  opacity: ${props => props.$isActive ? 1 : 0};
+  visibility: ${props => props.$isActive ? 'visible' : 'hidden'};
+  transition: all 0.3s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  
+  @media (max-width: 640px) {
+    min-width: unset;
+    width: 90vw;
+    padding: 1.5rem;
+  }
 `;
 
 const ProgressOverlay = styled.div<{ $isActive: boolean }>`
@@ -574,15 +703,15 @@ const ProgressHeader = styled.div`
   margin-bottom: 2rem;
   
   h3 {
-    color: #333;
+    color: #0091ae;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 0.5rem;
   }
   
   p {
-    color: #666;
-    font-size: 0.9rem;
+    color: #666666;
+    font-size: 0.95rem;
     margin: 0;
   }
 `;
@@ -635,34 +764,51 @@ const ProgressStep = styled.div<{ $isActive: boolean; $isCompleted: boolean }>`
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 8px;
+  height: 10px;
   background: #e9ecef;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const ProgressBarFill = styled.div<{ $progress: number }>`
   height: 100%;
   background: linear-gradient(135deg, #0091ae 0%, #ff7a59 100%);
-  border-radius: 4px;
-  transition: width 0.5s ease;
+  border-radius: 6px;
+  transition: width 0.8s ease;
   width: ${props => props.$progress}%;
+  box-shadow: 0 2px 8px rgba(0, 145, 174, 0.3);
 `;
 
 const JobIdDisplay = styled.div`
-  background: #f8f9fa;
+  background: #f0f9fb;
+  border: 1px solid #e6f4f7;
   border-radius: 8px;
   padding: 0.75rem;
-  margin-top: 1rem;
-  font-family: monospace;
+  margin-top: 1.5rem;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.85rem;
-  color: #666;
+  color: #0091ae;
   text-align: center;
   
   strong {
-    color: #333;
+    color: #007a94;
+    font-weight: 600;
   }
+`;
+
+const CurrentMessage = styled.div`
+  text-align: center;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f0f9fb;
+  border: 1px solid #e6f4f7;
+  border-radius: 8px;
+  color: #0091ae;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.4;
 `;
 
 export const Landing: React.FC = () => {
@@ -671,6 +817,7 @@ export const Landing: React.FC = () => {
   const [healthStatus, setHealthStatus] = useState<'checking' | 'healthy' | 'error'>('checking');
   const [scanType, setScanType] = useState<'immediate' | 'scheduled'>('immediate');
   const [loading, setLoading] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scanProgress, setScanProgress] = useState<{
     isActive: boolean;
     currentStep: number;
@@ -867,15 +1014,9 @@ export const Landing: React.FC = () => {
         )}
         
         {scanProgress.currentMessage && (
-          <div style={{ 
-            textAlign: 'center', 
-            marginTop: '1rem', 
-            color: '#0091ae', 
-            fontWeight: 500,
-            fontSize: '0.9rem'
-          }}>
+          <CurrentMessage>
             {scanProgress.currentMessage}
-          </div>
+          </CurrentMessage>
         )}
       </ProgressTracker>
 
@@ -885,6 +1026,7 @@ export const Landing: React.FC = () => {
             <LogoIcon>S</LogoIcon>
             Scanmesite.com
           </Logo>
+          
           <NavLinks>
             <NavLink $isDarkMode={isDarkMode} href="#features">Features</NavLink>
             <NavLink $isDarkMode={isDarkMode} href="#tools">Tools</NavLink>
@@ -895,9 +1037,19 @@ export const Landing: React.FC = () => {
               $isDarkMode={isDarkMode} 
               onClick={() => setIsDarkMode(!isDarkMode)}
               title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-            />
+            >
+              {isDarkMode ? '☀️' : '🌙'}
+            </DarkModeToggle>
           </NavLinks>
-                    <HealthStatus $status={healthStatus} onClick={handleHealthStatusClick}>
+
+          <MobileMenuButton 
+            $isDarkMode={isDarkMode}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu size={24} />
+          </MobileMenuButton>
+
+          <HealthStatus $status={healthStatus} onClick={handleHealthStatusClick}>
             {healthStatus === 'checking' && <Loader className="icon" />}
             {healthStatus === 'healthy' && <CheckCircle className="icon" />}
             {healthStatus === 'error' && <XCircle className="icon" />}
@@ -906,6 +1058,44 @@ export const Landing: React.FC = () => {
             {healthStatus === 'error' && 'Click here to wake the server up'}
           </HealthStatus>
         </Nav>
+
+        <MobileMenu $isDarkMode={isDarkMode} $isOpen={isMobileMenuOpen}>
+          <MobileMenuLinks>
+            <MobileNavLink $isDarkMode={isDarkMode} href="#features" onClick={() => setIsMobileMenuOpen(false)}>
+              Features
+            </MobileNavLink>
+            <MobileNavLink $isDarkMode={isDarkMode} href="#tools" onClick={() => setIsMobileMenuOpen(false)}>
+              Tools
+            </MobileNavLink>
+            <MobileNavLink 
+              $isDarkMode={isDarkMode} 
+              onClick={() => {
+                navigate('/support');
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Support
+            </MobileNavLink>
+            <MobileNavLink 
+              $isDarkMode={isDarkMode} 
+              onClick={() => {
+                navigate('/privacy');
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Privacy
+            </MobileNavLink>
+            <MobileNavLink 
+              $isDarkMode={isDarkMode} 
+              onClick={() => {
+                navigate('/terms');
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Terms
+            </MobileNavLink>
+          </MobileMenuLinks>
+        </MobileMenu>
       </Header>
 
       <HeroSection $isDarkMode={isDarkMode}>
